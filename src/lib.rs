@@ -8,25 +8,32 @@ pub struct Config{
 }
 
 impl Config{
-    pub fn build(args: &[String]) -> Result<Config, &str>{
-        if args.len() <3{
-            return Err("Must input 2 arguments: query and path")
-        }
-        let query = args[1].clone();
-        let filepath = args[2].clone();
-        dbg!();
-        let ignore_case:bool;
-        if args.len() >=4{
-            //Aunque en el environment no se ha tenido en cuenta el valor, aqui si que tenemos en cuenta si se pone true o false
-            ignore_case = match args[3].clone().as_str() {
-                "1" | "true" => true,
-                "0" | "false" => false,
-                _ => return Err("Invalid ignore_case argument (3rd), must be set to true(1), false(0) or left empty")
-            };
-        }else{
-            ignore_case= env::var("IGNORE_CASE").is_ok();
-        }
+    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str>{
+
+        args.next();
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Missing arguments: query (1)"),
+        };
+
+        let filepath = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Missing arguments: path (2)"),
+        };
+
+        let ignore_case = match args.next() {
+            Some(arg) => {
+                match arg.as_str() {
+                    "1" | "true" => true,
+                    "0" | "false" => false,
+                    _ => return Err("Invalid ignore_case argument (3rd), must be set to true(1), false(0) or left empty")
+                }
+            }
+            None => env::var("IGNORE_CASE").is_ok(),
+        };
+
         Ok(Config {query, filepath, ignore_case})
+
     }
 }
 

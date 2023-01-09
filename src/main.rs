@@ -5,10 +5,10 @@ use minigrep::Config;
 
 fn main() {
     
-    let args: Vec<String> = env::args().collect();
+    let args = env::args();
     // dbg!(&args);
 
-    let config_var = Config::build(&args).unwrap_or_else(|err| {
+    let config_var = Config::build(args).unwrap_or_else(|err| {
         eprintln!("{err}");
         process::exit(1);
     });
